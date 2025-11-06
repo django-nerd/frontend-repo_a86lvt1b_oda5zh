@@ -1,28 +1,50 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Catalog from './components/Catalog';
+import RFQForm from './components/RFQForm';
+import Footer from './components/Footer';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [query, setQuery] = useState('');
+  const [rfqItems, setRfqItems] = useState([]);
+
+  const rfqCount = rfqItems.length;
+
+  const handleAddToRfq = (item) => {
+    setRfqItems((prev) => [...prev, item]);
+    window.location.hash = 'rfq';
+  };
+
+  const handleRemoveItem = (index) => {
+    setRfqItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const onSubmitRFQ = (payload) => {
+    // For now, show a friendly confirmation. Backend can be wired later.
+    alert(`RFQ submitted!\n\nCompany: ${payload.company}\nEmail: ${payload.email}\nItems: ${payload.items.length}`);
+    setRfqItems([]);
+  };
+
+  const onExplore = () => {
+    const el = document.getElementById('catalog');
+    el?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const subtitle = useMemo(() => {
+    if (!query) return 'Browse a sample of frequently procured items';
+    return `Results for “${query}”`;
+  }, [query]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-white text-slate-900">
+      <Navbar onSearchChange={setQuery} rfqCount={rfqCount} />
+      <Hero onExplore={onExplore} />
+      <Catalog query={query} onAddToRfq={handleAddToRfq} subtitle={subtitle} />
+      <RFQForm items={rfqItems} onRemoveItem={handleRemoveItem} onSubmit={onSubmitRFQ} />
+      <Footer />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
